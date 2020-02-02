@@ -10,10 +10,8 @@ class YOLO(YOLOFunc):
     def __init__(self):
         super().__init__()
         self.net = YOLOFunc()
-        self.net.cfg_path = 'D:/_parking_slot_detection/_source/_nn_configs' \
-                            '/_yolo_cfg/yolov3.cfg '
-        self.net.weights_path = 'D:/_parking_slot_detection/_source' \
-                                '/_nn_configs/_yolo_cfg/yolov3.weights '
+        self.net.cfg_path = 'D:\_activity\_programming\_parking_slot_detection\_source\_nn_configs\_yolo_cfg/yolov3.cfg'
+        self.net.weights_path = 'D:\_activity\_programming\_parking_slot_detection\_source\_nn_configs\_yolo_cfg/yolov3.weights'
         # self.net.target = cv2.dnn.DNN_TARGET_OPENCL
         self.net.yolo_config()
 
@@ -40,7 +38,7 @@ if __name__ == '__main__':
         success = True
         count = 0
         vidcap = cv2.VideoCapture(
-            'D:/_parking_slot_detection/_source/_video/parking_test1.mp4')
+            'D:\_activity\_programming\_parking_slot_detection\_source\_video/parking_test1.mp4')
         while success:
             start_timer = time.time()
             success, image = vidcap.read()
@@ -54,7 +52,7 @@ if __name__ == '__main__':
         success = True
         count = 0
         vidcap = cv2.VideoCapture(
-            'D:/_parking_slot_detection/_source/_video/parking_test1.mp4')
+            'D:\_activity\_programming\_parking_slot_detection\_source\_video/parking_test1.mp4')
         while success:
             start_timer = time.time()
             success, image = vidcap.read()
