@@ -56,12 +56,12 @@ if __name__ == '__main__':
         vidcap = cv2.VideoCapture(
             'D:/_parking_slot_detection/_source/_video/parking_test1.mp4')
         while success:
-            start_time = time.time()
+            start_timer = time.time()
             success, image = vidcap.read()
             count += 1
             yolo2.detect_cars(image)
             print("Yolo2 total detect time: %s seconds" % (
-                    time.time() - start_time))
+                    time.time() - start_timer))
 
 
     thread1 = Thread(target=read_and_detect)
