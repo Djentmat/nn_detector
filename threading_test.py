@@ -54,7 +54,7 @@ if __name__ == '__main__':
         success = True
         count = 0
         vidcap = cv2.VideoCapture(
-            'D:/_parking_slot_detection/_source/_video\parking_test1.mp4')
+            'D:/_parking_slot_detection/_source/_video/parking_test1.mp4')
         while success:
             start_time = time.time()
             success, image = vidcap.read()
