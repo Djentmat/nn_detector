@@ -21,6 +21,7 @@ if __name__ == '__main__':
     yolo_test = YOLO()
     image = cv2.imread('D:\_activity\_programming\_parking_slot_detection\__work_dir\_nn_detector\_dataset/1/2013-04-09_12_50_07.jpg')
     height, width, channels = image.shape
+    ground_truth_bb = []
     with open('D:\_activity\_programming\_parking_slot_detection\__work_dir\_nn_detector\_dataset/1/2013-04-09_12_50_07.txt') as f:
         strings = f.readlines()
         for i in range(len(strings)):
@@ -28,12 +29,14 @@ if __name__ == '__main__':
             occupied = data[0]
             center_x = int(float(data[1])*width)
             center_y = int(float(data[2])*height)
-            size_w = int(float(data[3])*width)
-            size_h = int(float(data[4])*height)
-            print(occupied, center_x, center_y, size_w, size_h)
+            size_h = int(float(data[3])*width)
+            size_w = int(float(data[4])*height)
+            # print(occupied, center_x, center_y, size_w, size_h)
+            ground_truth_bb.append([center_x, center_y, size_w, size_h])
             cv2.rectangle(image,
                           (center_x-int(size_w/2), center_y-int(size_h/2)),
-                          (center_x + int(size_w/2), center_y + int(size_h/2)), (0, 0, 255), 1)
+                          (center_x + int(size_w/2), center_y + int(size_h/2)),
+                          (0, 255, 0), 1)
         cv2.imshow('1', image)
         cv2.waitKey(0)
         yolo_test = YOLOFunc()
@@ -45,4 +48,17 @@ if __name__ == '__main__':
         boxes, confidenses, coordinates = yolo_test.get_bb_and_confidences(
             image,
             result)
-        yolo_test.draw_result(image, boxes, confidenses)
+        print('Number of predicted objects: %s' % str(len(boxes)))
+        # yolo_test.draw_result(image, boxes, confidenses)
+        iou_list = []
+        iou_confidences = []
+        for i in range(len(boxes)):
+            for j in range(len(ground_truth_bb)):
+                iou = yolo_test.bb_intersection_over_union(boxes[i],
+                                                           ground_truth_bb[j])
+                if iou>0.2:
+                    print(iou)
+                    iou_list.append(boxes[i])
+                    iou_confidences.append(confidenses[i])
+        print('Number of iou objects: %s' % str(len(iou_list)))
+        yolo_test.draw_result(image, iou_list, iou_confidences)
