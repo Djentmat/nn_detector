@@ -18,7 +18,7 @@ class YOLO(YOLOFunc):
     def detect_cars(self, image):
         self.net.get_blob(image)
         result = self.net.yolo_detect()
-        boxes, confidenses, coordinates = self.net.get_bb_and_confidences(
+        boxes, confidenses, coordinates = self.net.data_of_detection(
             image, result)
         print('%s bounding_boxes found' % len(boxes))
 

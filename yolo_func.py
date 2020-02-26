@@ -53,7 +53,7 @@ class YOLOFunc:
         print("Objects detected for %s seconds" % (time.time() - start_time))
         return result_of_detect
 
-    def get_bb_and_confidences(self, image_for_detecting, result_of_detecting):
+    def data_of_detection(self, image_for_detecting, result_of_detecting):
         start_time = time.time()
         height, width, channels = image_for_detecting.shape
         confidences = []
@@ -95,7 +95,7 @@ class YOLOFunc:
         return boxes_filtered, confidences_filtered, coordinates_filtered
 
     @staticmethod
-    def draw_result(image_to_draw, bounding_boxes, confidences):
+    def draw_result(image_to_draw, bounding_boxes, confidences=None):
         if isinstance(bounding_boxes[0], list):
             for i in range(len(bounding_boxes)):
                 x, y, w, h = bounding_boxes[i]
@@ -109,11 +109,12 @@ class YOLOFunc:
                             (0, 255, 0),
                             1,
                             cv2.FILLED, )
-                cv2.rectangle(image_to_draw,
-                              (x, y),
-                              (x + w, y + h),
-                              (0, 0, 255),
-                              1)
+                if confidences:
+                    cv2.rectangle(image_to_draw,
+                                  (x, y),
+                                  (x + w, y + h),
+                                  (0, 0, 255),
+                                  1)
             cv2.imshow('image', image_to_draw)
             if cv2.waitKey(0) & 0xFF == ord('q'):
                 pass
@@ -124,14 +125,15 @@ class YOLOFunc:
             h = bounding_boxes[3]
             # center_x = int((x+x+w)/2)
             # center_y = int((y+y+h)/2)
-            cv2.putText(image_to_draw,
-                        str(np.round(confidences, 2)),
-                        (x, y + h),
-                        cv2.FONT_HERSHEY_COMPLEX,
-                        1,
-                        (0, 255, 0),
-                        1,
-                        cv2.FILLED, )
+            if confidences:
+                cv2.putText(image_to_draw,
+                            str(np.round(confidences, 2)),
+                            (x, y + h),
+                            cv2.FONT_HERSHEY_COMPLEX,
+                            1,
+                            (0, 255, 0),
+                            1,
+                            cv2.FILLED, )
             cv2.rectangle(image_to_draw,
                           (x, y),
                           (x + w, y + h),
@@ -150,19 +152,27 @@ class YOLOFunc:
 
     def bb_intersection_over_union(self, box1, box2):
 
-        # boxA = self.transform_coords(boxA)
-        # boxB = self.transform_coords(boxB)
+        boxA = self.transform_coords(box1)
+        boxB = self.transform_coords(box2)
 
+        # determine the (x, y)-coordinates of the intersection rectangle
+        xA = max(boxA[0], boxB[0])
+        yA = max(boxA[1], boxB[1])
+        xB = min(boxA[2], boxB[2])
+        yB = min(boxA[3], boxB[3])
+        # compute the area of intersection rectangle
+        interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+        # compute the area of both the prediction and ground-truth
+        # rectangles
+        boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+        boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+        # compute the intersection over union by taking the intersection
+        # area and dividing it by the sum of prediction + ground-truth
+        # areas - the interesection area
+        iou = interArea / float(boxAArea + boxBArea - interArea)
 
-        x1, y1, w1, h1 = box1
-        x2, y2, w2, h2 = box2
-        w_intersection = min(x1 + w1, x2 + w2) - max(x1, x2)
-        h_intersection = min(y1 + h1, y2 + h2) - max(y1, y2)
-        if w_intersection <= 0 or h_intersection <= 0:  # No overlap
-            return 0
-        I = w_intersection * h_intersection
-        U = w1 * h1 + w2 * h2 - I  # Union = Total Area - I
-        return I / U
+        # return the intersection over union value
+        return iou
 
 
 if __name__ == '__main__':
@@ -178,6 +188,6 @@ if __name__ == '__main__':
     yolo_test.yolo_config()
     yolo_test.get_blob(image)
     result = yolo_test.yolo_detect()
-    boxes, confidenses, coordinates = yolo_test.get_bb_and_confidences(image,
-                                                                       result)
+    boxes, confidenses, coordinates = yolo_test.data_of_detection(image,
+                                                                  result)
     yolo_test.draw_result(image, boxes, confidenses)
