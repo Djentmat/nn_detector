@@ -1,0 +1,5 @@
+total_tp = 32.0
+total_fp = 19.0
+total_fn = 15.0
+total_precision = 0.627450980392
+total_recall = 0.68085106383

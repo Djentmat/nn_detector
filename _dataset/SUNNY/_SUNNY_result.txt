@@ -1,0 +1,5 @@
+total_tp = nan
+total_fp = nan
+total_fn = nan
+total_precision = nan
+total_recall = nan
