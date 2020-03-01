@@ -2,13 +2,13 @@ from yolo_func import YOLOFunc
 import glob
 import os
 import cv2
-
+import numpy as np
 
 class YOLO(YOLOFunc):
     def __init__(self):
         super().__init__()
         path = 'D:/_activity/_programming/_parking_slot_detection/_source' \
-               '/_nn_configs/_yolo_cfg/ '
+               '/_nn_configs/_yolo_cfg/'
         self.net = YOLOFunc()
         self.net.cfg_path = path + 'yolov3.cfg'
         self.net.weights_path = path + 'yolov3.weights'
@@ -21,10 +21,23 @@ if __name__ == '__main__':
     print(subfolders)
     yolo_test = YOLO()
     for fld in range(len(subfolders)):
+        dir_TP = []
+        dir_FP = []
+        dir_FN = []
+        dir_precision = []
+        dir_recall = []
+
         img_list = glob.glob(subfolders[fld] + '/*.jpg')
         if not img_list:
             break
         for img in range(len(img_list)):
+
+            TP = []
+            FP = []
+            FN = []
+            precision = []
+            recall = []
+
             image = cv2.imread(img_list[img])
             height, width, channels = image.shape
             ground_truth_bb = []
@@ -88,7 +101,31 @@ if __name__ == '__main__':
                                 #                       ground_truth_bb[j])
                                 iou_list.append(boxes[i])
                                 iou_confidences.append(iou)
+                                TP.append(boxes[i])
+                    TP = len(iou_list)
+                    FP = len(boxes) - len(iou_list)
+                    FN = len(ground_truth_bb)-len(iou_list)
+                    precision = TP/(TP+FP)
+                    recall = TP/(TP + FN)
                     print('Number of iou objects: %s' % str(len(iou_list)))
+                    print('TP = %s' % str(TP))
+                    print('FP = %s' % str(FP))
+                    print('FN = %s' % str(FN))
+                    print('Precision = %s' % str(precision))
+                    print('Recall = %s' % str(recall))
+                    dir_TP.append(TP)
+                    dir_FP.append(FP)
+                    dir_FN.append(FN)
+                    dir_precision.append(precision)
+                    dir_recall.append(recall)
                     yolo_test.draw_result(image, iou_list, iou_confidences)
             except Exception as err:
                 print(str(err))
+        subfolder_name = subfolders[fld].split('\\')
+        with open(subfolders[fld] + '/_' + subfolder_name[1] +
+                  '_result.txt', 'w') as f:
+            f.write('total_tp = %s' % str(np.mean(dir_TP)) + '\n')
+            f.write('total_fp = %s' % str(np.mean(dir_FP)) + '\n')
+            f.write('total_fn = %s' % str(np.mean(dir_FN)) + '\n')
+            f.write('total_precision = %s' % str(np.mean(dir_precision)) + '\n')
+            f.write('total_recall = %s' % str(np.mean(dir_recall)) + '\n')
