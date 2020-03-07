@@ -1,10 +1,17 @@
+# -*- coding: utf-8 -*-
+"""
+@author: plakseev
+"""
+
 import cv2
 import numpy as np
 import time
 
 
 class YOLOFunc:
-
+    """
+    Setting up and usin YOLO
+    """
     def __init__(self):
         self.net = None
         self.weights_path = ''
@@ -17,20 +24,35 @@ class YOLOFunc:
         self.nms_threshhold = 0.4
 
     def get_net(self):
+        """
+        Reading net params
+        """
         self.net = cv2.dnn.readNet(self.weights_path, self.cfg_path)
 
     def set_backend(self):
+        """
+        Setting up backend
+        """
         self.net.setPreferableBackend(self.backend)
 
     def set_target(self):
+        """
+        Setting up target CPU or GPU
+        """
         self.net.setPreferableTarget(self.target)
 
     def get_yolo_layers(self):
+        """
+        Reading layer names from net
+        """
         layer_names = self.net.getLayerNames()
         self.layers = [layer_names[i[0] - 1]
                        for i in self.net.getUnconnectedOutLayers()]
 
     def yolo_config(self):
+        """
+        Confuguring net
+        """
         self.get_net()
         self.set_backend()
         self.set_target()
@@ -95,7 +117,9 @@ class YOLOFunc:
         return boxes_filtered, confidences_filtered, coordinates_filtered
 
     @staticmethod
-    def draw_result(image_to_draw, bounding_boxes, confidences=None):
+    def draw_result(image_to_draw, bounding_boxes,
+                    confidences=None, bb_color=(0, 255, 0),
+                    text_color=(0, 0, 255)):
         if isinstance(bounding_boxes[0], list):
             for i in range(len(bounding_boxes)):
                 x, y, w, h = bounding_boxes[i]
@@ -106,42 +130,19 @@ class YOLOFunc:
                             (x, y + h),
                             cv2.FONT_HERSHEY_COMPLEX,
                             1,
-                            (0, 255, 0),
+                            bb_color,
                             1,
                             cv2.FILLED, )
                 if confidences:
                     cv2.rectangle(image_to_draw,
                                   (x, y),
                                   (x + w, y + h),
-                                  (0, 0, 255),
+                                  text_color,
                                   1)
             cv2.imshow('image', image_to_draw)
             if cv2.waitKey(0) & 0xFF == ord('q'):
                 pass
-        else:
-            x = bounding_boxes[0]
-            y = bounding_boxes[1]
-            w = bounding_boxes[2]
-            h = bounding_boxes[3]
-            # center_x = int((x+x+w)/2)
-            # center_y = int((y+y+h)/2)
-            if confidences:
-                cv2.putText(image_to_draw,
-                            str(np.round(confidences, 2)),
-                            (x, y + h),
-                            cv2.FONT_HERSHEY_COMPLEX,
-                            1,
-                            (0, 255, 0),
-                            1,
-                            cv2.FILLED, )
-            cv2.rectangle(image_to_draw,
-                          (x, y),
-                          (x + w, y + h),
-                          (0, 0, 255),
-                          1)
-        cv2.imshow('image', image_to_draw)
-        if cv2.waitKey(0) & 0xFF == ord('q'):
-            pass
+
 
     def transform_coords(self, raw_bb):
         x_left_top = raw_bb[0] - int(raw_bb[2] / 2)
